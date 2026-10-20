@@ -39,6 +39,10 @@ df['Amount(in lakhs)'] = df['PRICE'].apply(clean_val)
 df = df.dropna(subset=['Area', 'Amount(in lakhs)'])
 print(f"Rows remaining after cleaning: {len(df)}")
 
+# --- ADD THIS DIAGNOSTIC PRINT ---
+print("\n--- Summary of Cleaned Data (Min/Max values) ---")
+print(df[['Area', 'Amount(in lakhs)']].describe())
+
 # 3. Filter realistic ranges 
 # (Area: 100 to 15,000 sqft, Price: 5 Lakhs to 5,000 Lakhs)
 df = df[(df['Area'] > 100) & (df['Area'] < 15000) & (df['Amount(in lakhs)'] > 5) & (df['Amount(in lakhs)'] < 5000)]
