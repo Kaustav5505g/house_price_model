@@ -43,14 +43,16 @@ print(f"Rows remaining after cleaning: {len(df)}")
 print("\n--- Summary of Cleaned Data (Min/Max values) ---")
 print(df[['Area', 'Amount(in lakhs)']].describe())
 
-# 3. Filter realistic ranges 
-# (Area: 100 to 15,000 sqft, Price: 5 Lakhs to 5,000 Lakhs)
-df = df[(df['Area'] > 100) & (df['Area'] < 15000) & (df['Amount(in lakhs)'] > 5) & (df['Amount(in lakhs)'] < 5000)]
+# 3. Filter realistic ranges based on our data summary
+# (Area: 100 to 10,000 sqft, Price/Amount: 1,000 to 200,000)
+df = df[(df['Area'] > 100) & (df['Area'] < 10000) & (df['Amount(in lakhs)'] > 1000) & (df['Amount(in lakhs)'] < 200000)]
 print(f"Rows remaining after filtering: {len(df)}")
 
 if len(df) > 10:
     X = df[['Area']]
-    y = df['Amount(in lakhs)'] * 100000  # Convert Lakhs to raw rupees
+    
+    # If the amount is already in usable units, assign it directly (or multiply if needed)
+    y = df['Amount(in lakhs)']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
