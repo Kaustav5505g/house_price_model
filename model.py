@@ -7,16 +7,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
-# 1. Automatically download the dataset via kagglehub
+# 1. Download and load
 path = kagglehub.dataset_download("arvanshul/gurgaon-real-estate-99acres-com")
-print("Path to dataset files:", path)
-
-# 2. Automatically find and read the CSV file
 csv_files = glob.glob(os.path.join(path, "*.csv"))
 df = pd.read_csv(csv_files[0])
 
-print("Available columns in dataset:", df.columns.tolist())
-
+# --- DIAGNOSTIC: Print a few rows of area and price columns ---
+print("Sample of area and price columns:")
+print(df[['SUPER_SQFT', 'BUILTUP_SQFT', 'AREA', 'PRICE']].head(5))
 
 # 1. Combine area columns using the correct dataset column names
 df['Area'] = df['SUPER_SQFT'].fillna(df['BUILTUP_SQFT']).fillna(df['AREA'])
