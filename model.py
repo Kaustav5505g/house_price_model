@@ -73,3 +73,24 @@ if len(df) > 10:
     plt.show()
 else:
     print("Error: Too few rows left after filtering. Check your dataset filters.")
+
+
+
+# Sort test values so the regression line draws smoothly
+sort_idx = X_test['Area'].argsort()
+X_test_sorted = X_test.iloc[sort_idx]
+y_pred_sorted = y_pred[sort_idx]
+
+plt.figure(figsize=(10, 6)) # Makes the window a nice readable size
+plt.scatter(X_test, y_test, color='blue', alpha=0.5, label='Actual Prices')
+plt.plot(X_test_sorted, y_pred_sorted, color='red', linewidth=2, label='Regression Line')
+
+plt.xlabel('Area (sqft)')
+plt.ylabel('Total Amount (in rupees)')
+plt.title('House Total Price vs Area (Linear Regression)')
+plt.legend()
+
+# Save a high-res copy for your project README!
+plt.savefig('house_price_regression.png', dpi=300, bbox_inches='tight')
+
+plt.show()
