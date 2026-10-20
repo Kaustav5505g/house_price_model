@@ -10,30 +10,32 @@ from sklearn.metrics import mean_squared_error, r2_score
 # 1. Automatically download dataset via kagglehub
 path = kagglehub.dataset_download("arvanshul/gurgaon-real-estate-99acres-com")
 csv_files = glob.glob(os.path.join(path, "*.csv"))
-df = pd.read_csv(csv_files[0])
+df = pd.read_csv(csv_files[0], low_memory=False)
 
 print(f"Total rows loaded: {len(df)}")
 
-# 2. Combine area columns using dataset column names
-df['Area'] = pd.to_numeric(df['SUPER_SQFT'], errors='coerce') \
-    .fillna(pd.to_numeric(df['BUILTUP_SQFT'], errors='coerce')) \
-    .fillna(pd.to_numeric(df['AREA'], errors='coerce'))
+# 2. Extract Area and Price safely
+# Let's combine the available area columns or use 'AREA' directly if numeric
+df['Area'] = pd.to_numeric(df['SUPER_SQFT'], errors='coerce')
+if df['Area'].isna().sum() == len(df):
+    df['Area'] = pd.to_numeric(df['BUILTUP_SQFT'], errors='coerce')
+if df['Area'].isna().sum() == len(df):
+    df['Area'] = pd.to_numeric(df['AREA'], errors='coerce')
 
-# 3. Clean price (PRICE column in this dataset is in Lakhs)
 df['Amount(in lakhs)'] = pd.to_numeric(df['PRICE'], errors='coerce')
 
-# Drop missing values
+# Drop rows missing area or price
 df = df.dropna(subset=['Area', 'Amount(in lakhs)'])
 print(f"Rows remaining after cleaning: {len(df)}")
 
-# 4. Filter realistic ranges (Area between 100-15000 sqft, Price between 10 Lakhs and 500 Lakhs / 5 Crores)
-df = df[(df['Area'] > 100) & (df['Area'] < 15000) & (df['Amount(in lakhs)'] > 10) & (df['Amount(in lakhs)'] < 500)]
+# 3. Filter realistic ranges 
+# (Area: 100 to 15,000 sqft, Price: 5 Lakhs to 5,000 Lakhs)
+df = df[(df['Area'] > 100) & (df['Area'] < 15000) & (df['Amount(in lakhs)'] > 5) & (df['Amount(in lakhs)'] < 5000)]
 print(f"Rows remaining after filtering: {len(df)}")
 
 if len(df) > 10:
     X = df[['Area']]
-    # Convert Lakhs to raw rupees for clean plotting and metrics
-    y = df['Amount(in lakhs)'] * 100000  
+    y = df['Amount(in lakhs)'] * 100000  # Convert Lakhs to raw rupees
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -52,16 +54,21 @@ if len(df) > 10:
     X_test_sorted = X_test.iloc[sort_idx]
     y_pred_sorted = y_pred[sort_idx]
 
+    # --- MATPLOTLIB VISUALIZATION ---
     plt.figure(figsize=(10, 6))
-    plt.scatter(X_test, y_test, color='blue', alpha=0.5, label='Actual Prices')
-    plt.plot(X_test_sorted, y_pred_sorted, color='red', linewidth=2, label='Regression Line')
-    plt.xlabel('Area (sqft)')
-    plt.ylabel('Total Amount (in rupees)')
-    plt.title('House Total Price vs Area (Linear Regression)')
+    plt.scatter(X_test, y_test, color='blue', alpha=0.4, label='Actual House Prices')
+    plt.plot(X_test_sorted, y_pred_sorted, color='red', linewidth=2.5, label='Linear Regression Line')
+    
+    plt.xlabel('Area (sqft)', fontsize=12)
+    plt.ylabel('Total Amount (in rupees)', fontsize=12)
+    plt.title('Gurgaon Real Estate: House Price vs. Area', fontsize=14)
     plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.5)
     
     # Save a high-res copy for your GitHub README
     plt.savefig('house_price_regression.png', dpi=300, bbox_inches='tight')
+    
+    # Pop open the graph window
     plt.show()
 else:
     print("Error: Too few rows left after filtering. Check your dataset filters.")
