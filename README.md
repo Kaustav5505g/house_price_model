@@ -1,23 +1,33 @@
 # Real Estate Valuation & Machine Learning Pipeline
 
-An end-to-end data science and regression project that processes, cleans, and models a large-scale real estate dataset (160k+ records) to predict property valuations using Multiple Linear Regression.
+An end-to-end data science project that processes, cleans, and models real estate data (10k+ records) to predict property valuations and classify market tiers using **Linear Regression** and **Logistic Regression**.
 
 ---
 
 ## 🛠️ Engineering Challenges & Solutions
 
-Real-world datasets are inherently messy. This project addresses several core data integrity issues:
-1. **Fragmented Area Columns:** Real estate records split size metrics across `Super Area`, `Carpet Area`, and `Plot Area` with inconsistent formatting. Developed a dynamic fallback ETL pipeline to consolidate these columns into a single unified `Area` metric.
-2. **Data Type & Text Sanitization:** Built robust helper functions using Python regex and string manipulation to strip units (e.g., `"sqft"`) and parse complex numerical monetary values.
-3. **Outlier Filtering & Target Correction:** Debugged mislabeled target variables (differentiating between rate-per-sqft and absolute property amounts) and filtered out extreme data entry errors to stabilize model convergence.
+Real-world datasets are inherently messy. This project tackles core data integrity issues:
+1. **Multi-Source Area Consolidation:** Handled fragmented area columns (`SUPER_SQFT`, `BUILTUP_SQFT`, `AREA`) by developing a dynamic fallback pipeline to unify size metrics.
+2. **Text & Unit Sanitization:** Built robust helper functions using Python string manipulation and regex to strip units (e.g., "sqft") and parse complex string-based numerical entries.
+3. **Outlier Filtering & Range Sanitization:** Cleaned anomalous data entry errors and applied rigorous value filtering to stabilize model convergence and prevent data skew.
 
 ---
 
-## 📊 Model Performance
+## 📊 Models & Methodology
 
-* **Algorithm:** Multiple Linear Regression (Scikit-Learn)
-* **Dataset Size:** 166,000+ processed rows
-* **Evaluation Metric ($R^2$ Score):** **0.47** (explains 47% of price variance based purely on area and structural cleaning)
+This project implements two core machine learning paradigms:
+
+1. **Regression (`model.py`)**: 
+   * **Algorithm:** Multiple Linear Regression (`scikit-learn`)
+   * **Target:** Continuous property pricing.
+   * **Evaluation Metric:** $R^2$ Score & Mean Squared Error (MSE).
+   * **Visualization:** Generates scatter plots paired with smooth linear regression lines.
+
+2. **Classification (`classifier.py`)**:
+   * **Algorithm:** Logistic Regression (`scikit-learn`)
+   * **Target:** Binned market tier prediction (Budget vs. Luxury classification based on median price thresholds).
+   * **Evaluation Metric:** Accuracy and Classification Report (Precision/Recall).
+   * **Visualization:** Plots actual test points alongside the signature Sigmoid probability curve.
 
 ---
 
@@ -26,5 +36,4 @@ Real-world datasets are inherently messy. This project addresses several core da
 ### Prerequisites
 Make sure you have Python installed along with the required data science libraries:
 ```bash
-pip install pandas numpy scikit-learn matplotlib
-```
+pip install pandas numpy scikit-learn matplotlib kagglehub joblib
