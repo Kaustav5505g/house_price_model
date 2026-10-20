@@ -1,44 +1,25 @@
+import os
+import glob
+import kagglehub
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
-df = pd.read_csv('house_prices.csv')
+# 1. Automatically download the dataset via kagglehub
+path = kagglehub.dataset_download("arvanshul/gurgaon-real-estate-99acres-com")
+print("Path to dataset files:", path)
 
-def clean_area(val):
-    if pd.isna(val):
-        return None
-    val_str = str(val).replace('sqft', '').replace('sq ft', '').strip()
-    try:
-        return float(val_str)
-    except:
-        return None
+# 2. Automatically find and read the CSV file
+csv_files = glob.glob(os.path.join(path, "*.csv"))
+df = pd.read_csv(csv_files[0])
 
-for col in ['Super Area', 'Carpet Area', 'Plot Area']:
-    if col in df.columns:
-        df[col] = df[col].apply(clean_area)
+print("Available columns in dataset:", df.columns.tolist())
 
-df['Area'] = df['Super Area'].fillna(df['Carpet Area']).fillna(df['Plot Area'])
 
-def clean_amount(val):
-    if pd.isna(val):
-        return None
-    val_str = str(val).replace(',', '').replace('₹', '').strip()
-    multiplier = 1.0
-    if 'cr' in val_str.lower():
-        multiplier = 10000000
-        val_str = val_str.lower().replace('cr', '').strip()
-    elif 'lac' in val_str.lower() or 'lakh' in val_str.lower():
-        multiplier = 100000
-        val_str = val_str.lower().replace('lac', '').replace('lakh', '').strip()
-    
-    try:
-        return float(val_str) * multiplier
-    except:
-        return None
-
-df['Amount(in rupees)'] = df['Amount(in rupees)'].apply(clean_amount)
+df['Area'] = df['SUPER_SQFT'].fillna(df['BUILTUP_SQFT']).fillna(df['AREA'])
+df['Amount(in rupees)'] = df['PRICE']
 
 df = df.dropna(subset=['Area', 'Amount(in rupees)'])
 
