@@ -18,13 +18,20 @@ df = pd.read_csv(csv_files[0])
 print("Available columns in dataset:", df.columns.tolist())
 
 
+# 1. Combine area columns using the correct dataset column names
 df['Area'] = df['SUPER_SQFT'].fillna(df['BUILTUP_SQFT']).fillna(df['AREA'])
 df['Amount(in rupees)'] = df['PRICE']
 
+# 2. Clean area and price by forcing them to numeric (coercing errors to NaN)
+df['Area'] = pd.to_numeric(df['Area'], errors='coerce')
+df['Amount(in rupees)'] = pd.to_numeric(df['Amount(in rupees)'], errors='coerce')
+
+# 3. Drop rows where area or price is missing
 df = df.dropna(subset=['Area', 'Amount(in rupees)'])
 
 print(f"Rows remaining after cleaning: {len(df)}")
 
+# 4. Now safe to filter numerically!
 df = df[(df['Area'] > 50) & (df['Area'] < 15000) & (df['Amount(in rupees)'] > 100000) & (df['Amount(in rupees)'] < 50000000)]
 
 print(f"Rows remaining after filtering: {len(df)}")
