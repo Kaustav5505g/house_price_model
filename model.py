@@ -14,15 +14,26 @@ df = pd.read_csv(csv_files[0], low_memory=False)
 
 print(f"Total rows loaded: {len(df)}")
 
-# 2. Extract Area and Price safely
-# Let's combine the available area columns or use 'AREA' directly if numeric
-df['Area'] = pd.to_numeric(df['SUPER_SQFT'], errors='coerce')
-if df['Area'].isna().sum() == len(df):
-    df['Area'] = pd.to_numeric(df['BUILTUP_SQFT'], errors='coerce')
-if df['Area'].isna().sum() == len(df):
-    df['Area'] = pd.to_numeric(df['AREA'], errors='coerce')
+# 2. Helper function to strip text/units and convert to float
+def clean_val(val):
+    if pd.isna(val):
+        return None
+    val_str = str(val).lower().replace('sqft', '').replace('sq.ft', '').replace(',', '').strip()
+    try:
+        return float(val_str)
+    except:
+        return None
 
-df['Amount(in lakhs)'] = pd.to_numeric(df['PRICE'], errors='coerce')
+# Clean the available area columns
+for col in ['SUPER_SQFT', 'BUILTUP_SQFT', 'AREA']:
+    if col in df.columns:
+        df[col] = df[col].apply(clean_val)
+
+# Combine area columns using fallback
+df['Area'] = df['SUPER_SQFT'].fillna(df['BUILTUP_SQFT']).fillna(df['AREA'])
+
+# Clean price column
+df['Amount(in lakhs)'] = df['PRICE'].apply(clean_val)
 
 # Drop rows missing area or price
 df = df.dropna(subset=['Area', 'Amount(in lakhs)'])
