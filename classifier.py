@@ -88,3 +88,6 @@ if len(df) > 10:
     plt.show()
 else:
     print("Error: Too few rows left after filtering.")
+import joblib
+joblib.dump(model, 'linear_regression_model.pkl')
+print("Linear Regression model saved successfully!")
